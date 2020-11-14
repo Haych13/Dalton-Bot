@@ -44,19 +44,19 @@ def process_pms(red):
     if (not path.exists("daltonized")):
         os.mkdir("daltonized")
 
-    # Loop through all unread messages in inbox.
-    for msg in red.inbox.unread(limit=None):
-        # Getting response criterias.
-        usernameMention = msg.subject == 'username mention'
-        usernameInBody = msg.subject == 'comment reply' and botname in msg.body.lower()
-        isCommentReply = msg.was_comment
+    try:
+        # Loop through all unread messages in inbox.
+        for msg in red.inbox.unread(limit=None):
+            # Getting response criterias.
+            usernameMention = msg.subject == 'username mention'
+            usernameInBody = msg.subject == 'comment reply' and botname in msg.body.lower()
+            isCommentReply = msg.was_comment
 
-        # This PM doesn't meet the response criteria. Mark it as 'read' and skip it.
-        if not (usernameMention or usernameInBody or not isCommentReply):
-            msg.mark_read()
-            continue
+            # This PM doesn't meet the response criteria. Mark it as 'read' and skip it.
+            if not (usernameMention or usernameInBody or not isCommentReply):
+                msg.mark_read()
+                continue
 
-        try:
             # Retrieve the mentioned comment using the message ID.
             mentionedComment = red.comment(msg.id)
             mentionedComment.refresh()
@@ -123,7 +123,7 @@ def process_pms(red):
                 # If images are uploaded.
                 if (uploaded_image_d is not None and uploaded_image_p is not None):
                     print_d("This is the uploaded D-Image: " + uploaded_image_d.link + ", P-Image: " + uploaded_image_p.link)
-                    commentReply = "Here you go:\n\nDeutan: " + uploaded_image_d.link + "\n\nProtan: " + uploaded_image_p.link + "\n\n---\n\n^^*I* ^^*am* ^^*a* ^^*bot,* ^^*and* ^^*this* ^^*action* ^^*was* ^^*performed* ^^*automatically.* &#32; ^^| ^^[Subreddit](http://www.reddit.com//r/DaltonBot/)&#32; ^^| ^^[Source](https://gitlab.com/Haych/dalton-bot)"
+                    commentReply = "Here you go:\n\nDeutanopia: " + uploaded_image_d.link + "\n\nProtanopia: " + uploaded_image_p.link + "\n\n^^*I* ^^*am* ^^*a* ^^*bot,* ^^*and* ^^*this* ^^*action* ^^*was* ^^*performed* ^^*automatically.*"
                 else:
                     print_d("The Imgur links don't exist")
             else:
@@ -144,11 +144,11 @@ def process_pms(red):
                 os.remove(config.outputdirprotanopia)
             else:
                 print_d("Failed to daltonize/upload image. See above reason(s).")
-        except Exception as e:
-            if hasattr(e, 'message'):
-                print_d(str(e.message))
-            else:
-                print_d(str(e))
+    except Exception as e:
+        if hasattr(e, 'message'):
+            print_d(str(e.message))
+        else:
+            print_d(str(e))
 
 r = bot_login()
 
