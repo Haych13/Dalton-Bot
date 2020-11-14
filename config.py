@@ -1,0 +1,7 @@
+username = "Bot-Name"
+password = "Bot-Password"
+client_id = "Bot-ID"
+client_secret = "Bot-Secret"
+outputdirdeutanopia = "daltonized/deutanopia.jpg"
+outputdirprotanopia = "daltonized/protanopia.jpg"
+imgur_client_id = "imgurclientid"
