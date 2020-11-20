@@ -128,7 +128,7 @@ def process_pms(red):
                 # If images are uploaded.
                 if (uploaded_image_d is not None and uploaded_image_p is not None):
                     print_d("This is the uploaded D-Image: " + uploaded_image_d.link + ", P-Image: " + uploaded_image_p.link + ", T-Image: " + uploaded_image_t.link)
-                    commentReply = "Here you go:\n\ndeutan: " + uploaded_image_d.link + "\n\nProtan: " + uploaded_image_p.link + "\n\nTritan: " + uploaded_image_t.link + "\n\n---\n\n^^*I* ^^*am* ^^*a* ^^*bot,* ^^*and* ^^*this* ^^*action* ^^*was* ^^*performed* ^^*automatically.* &#32; ^^| ^^[Subreddit](http://www.reddit.com//r/DaltonBot/)&#32; ^^| ^^[Source](https://gitlab.com/Haych/dalton-bot)"
+                    commentReply = "Here you go:\n\nDeutan: " + uploaded_image_d.link + "\n\nProtan: " + uploaded_image_p.link + "\n\nTritan: " + uploaded_image_t.link + "\n\n---\n\n^^*I* ^^*am* ^^*a* ^^*bot,* ^^*and* ^^*this* ^^*action* ^^*was* ^^*performed* ^^*automatically.* &#32; ^^| ^^[Subreddit](http://www.reddit.com//r/DaltonBot/)&#32; ^^| ^^[Source](https://gitlab.com/Haych/dalton-bot)"
                 else:
                     print_d("The Imgur links don't exist")
             else:
