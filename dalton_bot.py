@@ -81,7 +81,7 @@ def process_pms(red):
             imageUrl = None
             commentReply = None
             uploaded_image_d = None
-            uploaded_image_d = None
+            uploaded_image_p = None
             uploaded_image_t = None
 
             # If submission is a link post.
