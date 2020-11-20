@@ -1,0 +1,15 @@
+[Unit]
+Description=Dolton-Bot service
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+ExecStart=python3 -u /opt/dalton_bot.py
+User=Dalton
+Group=Dalton
+
+[Install]
+WantedBy=multi-user.target
