@@ -92,11 +92,14 @@ def process_pms(red):
             if (not commentPost.is_self):
                 imageUrl = commentPost.url
             else:
+                print_d("Post is a self post.")
                 commentReply = "I'm sorry, but I don't work for self posts." + config.footer_text
+                make_comment(msg, mentionedComment, commentReply)
+                continue
 
             # If the URL is not null.
             if (imageUrl is not None):
-                print_d("This is the post URL: "+ imageUrl)
+                print_d("This is the post URL: " + imageUrl)
 
                 # Ensures content type of url request is of valid image type.
                 image_formats = ("image/png", "image/jpeg", "image/gif", "image/bmp")
@@ -127,45 +130,59 @@ def process_pms(red):
                         else:
                             # The daltonized images were not found, so must have failed during daltonization.
                             print_d("Failed to daltonize. Daltonized images were not found.")
-                            commentReply = "I'm sorry, but I was unable to daltonize the image" + config.footer_text
+                            commentReply = "I'm sorry, but I was unable to daltonize the image." + config.footer_text
+                            make_comment(msg, mentionedComment, commentReply)
+                            continue
                     else:
                         # The bot failed to download the image in the post.
                         print_d("Failed to download image. Image file was not found.")
-                        commentReply = "I'm sorry, but I was unable to download this image to daltonize" + config.footer_text
+                        commentReply = "I'm sorry, but I was unable to download this image." + config.footer_text
+                        make_comment(msg, mentionedComment, commentReply)
+                        continue
                 else:
                     # The bot couldn't download the image because the post link was not an image.
                     print_d("Failed to download. Post link was not an image.")
-                    commentReply = "I'm sorry, but I don't work for links that aren't images" + config.footer_text
+                    commentReply = "I'm sorry, but I don't work for links that aren't images." + config.footer_text
+                    make_comment(msg, mentionedComment, commentReply)
+                    continue
 
                 # If images are uploaded.
-                if (uploaded_image_d is not None and uploaded_image_p is not None):
+                if (uploaded_image_d is not None and uploaded_image_p is not None and uploaded_image_t is not None):
                     print_d("This is the uploaded D-Image: " + uploaded_image_d.link + ", P-Image: " + uploaded_image_p.link + ", T-Image: " + uploaded_image_t.link)
                     commentReply = "Here you go:\n\nDeutan: " + uploaded_image_d.link + "\n\nProtan: " + uploaded_image_p.link + "\n\nTritan: " + uploaded_image_t.link + config.footer_text
+                    make_comment(msg, mentionedComment, commentReply)
+                    continue
                 else:
+                    # The bot failed to upload the images to Imgur.
                     print_d("The Imgur links don't exist")
-                    commentReply = "I'm sorry, but I was unable to upload the daltonized images to Imgur" + config.footer_text
-            else:
-                print_d("Unable to retrieve post url.")
-                commentReply = "I'm sorry, but I was unable to retrieve the post URL" + config.footer_text
+                    commentReply = "I'm sorry, but I was unable to upload the daltonized images to Imgur." + config.footer_text
+                    make_comment(msg, mentionedComment, commentReply)
+                    continue
 
-            # If a reply was generated using the Imgur links.
-            if (commentReply is not None):
-                # Reply to comment.
-                mentionedComment.reply(commentReply)
-                print_d('Comment made.\n')
+            # Make the comment with the imgur links containing the daltonized images.
+            make_comment(msg, mentionedComment, commentReply)
 
-                # Mark message as read.
-                msg.mark_read()
-
-                # Cleanup operation.
-                clean_output_directories()
-            else:
-                print_d("Failed to daltonize/upload image. See above reason(s).")
     except Exception as e:
+        # An error has occured, log the message and retry.
+        print_d(str(e))
         if hasattr(e, 'message'):
             print_d(str(e.message))
-        else:
-            print_d(str(e))
+
+def make_comment(msg, mentionedComment, commentReply):
+    """ Makes a comment on the comment reply, marks the message as read, and cleans the output directories (if needed). """
+
+    if (commentReply is not None):
+        # Reply to comment.
+        mentionedComment.reply(commentReply)
+        print_d('Comment made.\n')
+
+        # Mark the message as read
+        msg.mark_read()
+
+        # Clean the output directories (if needed)
+        clean_output_directories()
+    else:
+        print_d("The generated comment was empty, comment was not made.")
 
 r = bot_login()
 
