@@ -7,7 +7,7 @@ StartLimitIntervalSec=0
 Type=simple
 Restart=always
 RestartSec=1
-ExecStart=python3 -u /opt/dalton_bot.py
+ExecStart=python3 -u /opt/DaltonBot/dalton_bot.py
 User=Dalton
 Group=Dalton
 
