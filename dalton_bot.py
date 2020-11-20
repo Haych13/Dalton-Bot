@@ -109,7 +109,7 @@ def process_pms(red):
                         d_run("daltonize-this.jpg", config.outputdirtritanopia, "t");
 
                         # Verify daltonized output files exist.
-                        if (os.path.isfile(config.outputdirdeuteranopia) and os.path.isfile(config.outputdirprotanopia)) and os.path.isfile(config.outputdirtritanopia)):
+                        if (os.path.isfile(config.outputdirdeuteranopia) and os.path.isfile(config.outputdirprotanopia) and os.path.isfile(config.outputdirtritanopia)):
                             print_d("Successfully daltonized images")
                             print_d("Uploading to Imgur...")
 
