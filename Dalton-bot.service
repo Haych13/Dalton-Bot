@@ -1,5 +1,5 @@
 [Unit]
-Description=Dolton-Bot service
+Description=Dalton-Bot service
 After=network.target
 StartLimitIntervalSec=0
 
