@@ -10,7 +10,7 @@ import pyimgur
 from os import path
 from datetime import datetime
 
-botname = 'u/' + config.username.lower
+botname = 'u/' + config.username.lower()
 
 def print_d(logmsg):
     """ Prints the given message with a timestamp prepended. """
