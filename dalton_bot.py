@@ -10,15 +10,15 @@ import pyimgur
 from os import path
 from datetime import datetime
 
-botname = 'u/dalton-bot'
+botname = 'u/' + config.username.lower()
 
 def print_d(logmsg):
-    """ Prints the given message with a timestamp prepended"""
+    """ Prints the given message with a timestamp prepended. """
     now = datetime.now()
     print(str(now) + ": " + logmsg)
 
 def bot_login():
-    """ function for logging in the bot into Reddit. """
+    """ Function for logging in the bot into Reddit. """
     print_d("Logging in...")
     r = praw.Reddit(username = config.username,
                 password = config.password,
@@ -29,18 +29,22 @@ def bot_login():
     
     return r
 
+def clean_output_directories():
+    """ Function for cleaning up the output directories. """
+    if (os.path.isfile("daltonize-this.jpg")):
+        os.remove("daltonize-this.jpg")
+    if (os.path.isfile(config.output_dir_deuteranopia)):
+        os.remove(config.output_dir_deuteranopia)
+    if (os.path.isfile(config.output_dir_protanopia)):
+        os.remove(config.output_dir_protanopia)
+    if (os.path.isfile(config.output_dir_tritanopia)):
+        os.remove(config.output_dir_tritanopia)
+
 def process_pms(red):
     """ Function for processing edit requests via pm """
 
     # Cleanup operation if bot died mid-daltonization.
-    if (os.path.isfile("daltonize-this.jpg")):
-        os.remove("daltonize-this.jpg")
-    if (os.path.isfile(config.outputdirdeuteranopia)):
-        os.remove(config.outputdirdeuteranopia)
-    if (os.path.isfile(config.outputdirprotanopia)):
-        os.remove(config.outputdirprotanopia)
-    if (os.path.isfile(config.outputdirtritanopia)):
-        os.remove(config.outputtritanopia)
+    clean_output_directories()
 
     # Create output directory for daltonized images.
     if (not path.exists("daltonized")):
@@ -87,10 +91,15 @@ def process_pms(red):
             # If submission is a link post.
             if (not commentPost.is_self):
                 imageUrl = commentPost.url
+            else:
+                print_d("Post is a self post.")
+                commentReply = "I'm sorry, but I don't work for self posts." + config.footer_text
+                make_comment(msg, mentionedComment, commentReply)
+                continue
 
             # If the URL is not null.
             if (imageUrl is not None):
-                print_d("This is the post URL: "+ imageUrl)
+                print_d("This is the post URL: " + imageUrl)
 
                 # Ensures content type of url request is of valid image type.
                 image_formats = ("image/png", "image/jpeg", "image/gif", "image/bmp")
@@ -104,57 +113,76 @@ def process_pms(red):
                         print_d("Daltonizing...")
 
                         # Runs the daltonization operation for both deuteranopia and protanopia colourblindness.
-                        d_run("daltonize-this.jpg", config.outputdirdeuteranopia, "d");
-                        d_run("daltonize-this.jpg", config.outputdirprotanopia, "p");
-                        d_run("daltonize-this.jpg", config.outputdirtritanopia, "t");
+                        d_run("daltonize-this.jpg", config.output_dir_deuteranopia, "d");
+                        d_run("daltonize-this.jpg", config.output_dir_protanopia, "p");
+                        d_run("daltonize-this.jpg", config.output_dir_tritanopia, "t");
 
                         # Verify daltonized output files exist.
-                        if (os.path.isfile(config.outputdirdeuteranopia) and os.path.isfile(config.outputdirprotanopia) and os.path.isfile(config.outputdirtritanopia)):
+                        if (os.path.isfile(config.output_dir_deuteranopia) and os.path.isfile(config.output_dir_protanopia) and os.path.isfile(config.output_dir_tritanopia)):
                             print_d("Successfully daltonized images")
                             print_d("Uploading to Imgur...")
 
                             # Upload daltonized images to Imgur.
                             im = pyimgur.Imgur(config.imgur_client_id)
-                            uploaded_image_d = im.upload_image(config.outputdirdeuteranopia, title="Uploaded by /u/Dalton-Bot")
-                            uploaded_image_p = im.upload_image(config.outputdirprotanopia, title="Uploaded by /u/Dalton-Bot")
-                            uploaded_image_t = im.upload_image(config.outputdirtritanopia, title="Uploaded by /u/Dalton-Bot")
+                            uploaded_image_d = im.upload_image(config.output_dir_deuteranopia, title="Uploaded by /u/Dalton-Bot")
+                            uploaded_image_p = im.upload_image(config.output_dir_protanopia, title="Uploaded by /u/Dalton-Bot")
+                            uploaded_image_t = im.upload_image(config.output_dir_tritanopia, title="Uploaded by /u/Dalton-Bot")
                         else:
+                            # The daltonized images were not found, so must have failed during daltonization.
                             print_d("Failed to daltonize. Daltonized images were not found.")
+                            commentReply = "I'm sorry, but I was unable to daltonize the image." + config.footer_text
+                            make_comment(msg, mentionedComment, commentReply)
+                            continue
                     else:
+                        # The bot failed to download the image in the post.
                         print_d("Failed to download image. Image file was not found.")
+                        commentReply = "I'm sorry, but I was unable to download this image." + config.footer_text
+                        make_comment(msg, mentionedComment, commentReply)
+                        continue
                 else:
+                    # The bot couldn't download the image because the post link was not an image.
                     print_d("Failed to download. Post link was not an image.")
+                    commentReply = "I'm sorry, but I don't work for links that aren't images." + config.footer_text
+                    make_comment(msg, mentionedComment, commentReply)
+                    continue
 
                 # If images are uploaded.
-                if (uploaded_image_d is not None and uploaded_image_p is not None):
+                if (uploaded_image_d is not None and uploaded_image_p is not None and uploaded_image_t is not None):
                     print_d("This is the uploaded D-Image: " + uploaded_image_d.link + ", P-Image: " + uploaded_image_p.link + ", T-Image: " + uploaded_image_t.link)
-                    commentReply = "Here you go:\n\nDeutan: " + uploaded_image_d.link + "\n\nProtan: " + uploaded_image_p.link + "\n\nTritan: " + uploaded_image_t.link + "\n\n---\n\n^^*I* ^^*am* ^^*a* ^^*bot,* ^^*and* ^^*this* ^^*action* ^^*was* ^^*performed* ^^*automatically.* &#32; ^^| ^^[Subreddit](http://www.reddit.com//r/DaltonBot/)&#32; ^^| ^^[Source](https://gitlab.com/Haych/dalton-bot)"
+                    commentReply = "Here you go:\n\nDeutan: " + uploaded_image_d.link + "\n\nProtan: " + uploaded_image_p.link + "\n\nTritan: " + uploaded_image_t.link + config.footer_text
+                    make_comment(msg, mentionedComment, commentReply)
+                    continue
                 else:
+                    # The bot failed to upload the images to Imgur.
                     print_d("The Imgur links don't exist")
-            else:
-                print_d("Unable to retrieve post url.")
+                    commentReply = "I'm sorry, but I was unable to upload the daltonized images to Imgur." + config.footer_text
+                    make_comment(msg, mentionedComment, commentReply)
+                    continue
 
-            # If a reply was generated using the Imgur links.
-            if (commentReply is not None):
-                # Reply to comment.
-                mentionedComment.reply(commentReply)
-                print_d('Comment made.\n')
+            # Make the comment with the imgur links containing the daltonized images.
+            make_comment(msg, mentionedComment, commentReply)
 
-                # Mark message as read.
-                msg.mark_read()
-
-                # Cleanup operation.
-                os.remove("daltonize-this.jpg")
-                os.remove(config.outputdirdeuteranopia)
-                os.remove(config.outputdirprotanopia)
-                os.remove(config.outputdirtritanopia)
-            else:
-                print_d("Failed to daltonize/upload image. See above reason(s).")
     except Exception as e:
+        # An error has occured, log the message and retry.
+        print_d(str(e))
         if hasattr(e, 'message'):
             print_d(str(e.message))
-        else:
-            print_d(str(e))
+
+def make_comment(msg, mentionedComment, commentReply):
+    """ Makes a comment on the comment reply, marks the message as read, and cleans the output directories (if needed). """
+
+    if (commentReply is not None):
+        # Reply to comment.
+        mentionedComment.reply(commentReply)
+        print_d('Comment made.\n')
+
+        # Mark the message as read
+        msg.mark_read()
+
+        # Clean the output directories (if needed)
+        clean_output_directories()
+    else:
+        print_d("The generated comment was empty, comment was not made.")
 
 r = bot_login()
 
