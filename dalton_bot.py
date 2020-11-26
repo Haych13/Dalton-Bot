@@ -66,7 +66,7 @@ def process_pms(red):
             usernameInBody = msg.subject == 'comment reply' and botname in msg.body.lower()
             isCommentReply = msg.was_comment
 
-            daltonize_flag = True if '--d' in msg.body.lower() or 'dick' in msg.body.lower() else False
+            daltonize_flag = True if '--d' in msg.body.lower() or 'daltonize' in msg.body.lower() else False
             simulate_flag = True if '--s' in msg.body.lower() or 'simulate' in msg.body.lower() else False
 
             daltonize_error = False
