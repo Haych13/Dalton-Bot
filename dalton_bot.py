@@ -155,6 +155,7 @@ def process_pms(red):
                             s_run("downloaded-image.jpg", config.s_output_dir_protanopia, "p")
                             s_run("downloaded-image.jpg", config.s_output_dir_tritanopia, "t")
 
+                        # imgur upload client.
                         im = pyimgur.Imgur(config.imgur_client_id)
                         if (daltonize_flag is True):
                             if (os.path.isfile(config.d_output_dir_deuteranopia) and os.path.isfile(config.d_output_dir_protanopia) and os.path.isfile(config.d_output_dir_tritanopia)):
@@ -195,46 +196,41 @@ def process_pms(red):
                     make_comment(msg, mentionedComment, commentReply)
                     continue
 
+                # If an error occurred during daltonization or simulation.
+                if (daltonize_error is True or simulate_error is True):
+                    make_comment(msg, mentionedComment, commentReply)
+                    continue
+
                 # If images are uploaded.
                 if (daltonize_flag is True and simulate_flag is True):
                     if (d_uploaded_image_d is not None and d_uploaded_image_p is not None and d_uploaded_image_t is not None and s_uploaded_image_d is not None and s_uploaded_image_p is not None and s_uploaded_image_t is not None):
                         print_d("This is the uploaded daltonized D-Image: " + d_uploaded_image_d.link + ", P-Image: " + d_uploaded_image_p.link + ", T-Image: " + d_uploaded_image_t.link)
                         print_d("This is the uploaded simulated D-Image: " + s_uploaded_image_d.link + ", P-Image: " + s_uploaded_image_p.link + ", T-Image: " + s_uploaded_image_t.link)
                         commentReply = "Here are your daltonized images:\n\nDeutan: " + d_uploaded_image_d.link + "\n\nProtan: " + d_uploaded_image_p.link + "\n\nTritan: " + d_uploaded_image_t.link + "\n\n&nbsp;\n\nHere are your simulated images:\n\nDeutan: " + s_uploaded_image_d.link + "\n\nProtan: " + s_uploaded_image_p.link + "\n\nTritan: " + s_uploaded_image_t.link + config.footer_text
-                        make_comment(msg, mentionedComment, commentReply)
-                        continue
                     else:
                         # The bot failed to upload the images to Imgur.
                         print_d("The Imgur links don't exist")
                         commentReply = "I'm sorry, but I was unable to upload the daltonized/simulated images to Imgur." + config.footer_text
-                        make_comment(msg, mentionedComment, commentReply)
-                        continue
 
                 elif (daltonize_flag is True and simulate_flag is False):
                     if (d_uploaded_image_d is not None and d_uploaded_image_p is not None and d_uploaded_image_t is not None):
                         print_d("This is the uploaded daltonized D-Image: " + d_uploaded_image_d.link + ", P-Image: " + d_uploaded_image_p.link + ", T-Image: " + d_uploaded_image_t.link)
                         commentReply = "Here are your daltonized images:\n\nDeutan: " + d_uploaded_image_d.link + "\n\nProtan: " + d_uploaded_image_p.link + "\n\nTritan: " + d_uploaded_image_t.link + config.footer_text
-                        make_comment(msg, mentionedComment, commentReply)
-                        continue
                     else:
                         # The bot failed to upload the images to Imgur.
                         print_d("The Imgur links don't exist")
                         commentReply = "I'm sorry, but I was unable to upload the daltonized images to Imgur." + config.footer_text
-                        make_comment(msg, mentionedComment, commentReply)
-                        continue
                     
                 elif (daltonize_flag is False and simulate_flag is True):
                     if (s_uploaded_image_d is not None and s_uploaded_image_p is not None and s_uploaded_image_t is not None):
                         print_d("This is the uploaded simulated D-Image: " + s_uploaded_image_d.link + ", P-Image: " + s_uploaded_image_p.link + ", T-Image: " + s_uploaded_image_t.link)
                         commentReply = "Here your simulated images:\n\nDeutan: " + s_uploaded_image_d.link + "\n\nProtan: " + s_uploaded_image_p.link + "\n\nTritan: " + s_uploaded_image_t.link + config.footer_text
-                        make_comment(msg, mentionedComment, commentReply)
-                        continue
                     else:
                         # The bot failed to upload the images to Imgur.
                         print_d("The Imgur links don't exist")
                         commentReply = "I'm sorry, but I was unable to upload the simulated images to Imgur." + config.footer_text
-                        make_comment(msg, mentionedComment, commentReply)
-                        continue
+
+                make_comment(msg, mentionedComment, commentReply)
 
     except Exception as e:
         # An error has occured, log the message and retry.
