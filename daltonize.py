@@ -480,6 +480,14 @@ def d_run(input, output, type):
     dalton_img = array_to_img(dalton_rgb, 2.4)
     dalton_img.save(output)
 
+def s_run(input, output, type):
+    orig_img = np.asarray(Image.open(input).convert("RGB"), dtype=np.float16)
+    orig_img = gamma_correction(orig_img, 2.4)
+
+    simul_rgb = simulate(orig_img, type)
+    simul_img = array_to_img(simul_rgb, 2.4)
+    simul_img.save(output)
+
 def main():
     
     if args.simulate is False and args.daltonize is False:

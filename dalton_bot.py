@@ -5,7 +5,7 @@ import os
 import urllib.request
 from urllib.request import urlopen
 import subprocess
-from daltonize import d_run
+from daltonize import d_run, s_run
 import pyimgur
 from os import path
 from datetime import datetime
@@ -31,14 +31,20 @@ def bot_login():
 
 def clean_output_directories():
     """ Function for cleaning up the output directories. """
-    if (os.path.isfile("daltonize-this.jpg")):
-        os.remove("daltonize-this.jpg")
-    if (os.path.isfile(config.output_dir_deuteranopia)):
-        os.remove(config.output_dir_deuteranopia)
-    if (os.path.isfile(config.output_dir_protanopia)):
-        os.remove(config.output_dir_protanopia)
-    if (os.path.isfile(config.output_dir_tritanopia)):
-        os.remove(config.output_dir_tritanopia)
+    if (os.path.isfile("downloaded-image.jpg")):
+        os.remove("downloaded-image.jpg")
+    if (os.path.isfile(config.d_output_dir_deuteranopia)):
+        os.remove(config.d_output_dir_deuteranopia)
+    if (os.path.isfile(config.d_output_dir_protanopia)):
+        os.remove(config.d_output_dir_protanopia)
+    if (os.path.isfile(config.d_output_dir_tritanopia)):
+        os.remove(config.d_output_dir_tritanopia)
+    if (os.path.isfile(config.s_output_dir_deuteranopia)):
+        os.remove(config.s_output_dir_deuteranopia)
+    if (os.path.isfile(config.s_output_dir_protanopia)):
+        os.remove(config.s_output_dir_protanopia)
+    if (os.path.isfile(config.s_output_dir_tritanopia)):
+        os.remove(config.s_output_dir_tritanopia)
 
 def process_pms(red):
     """ Function for processing edit requests via pm """
@@ -46,9 +52,11 @@ def process_pms(red):
     # Cleanup operation if bot died mid-daltonization.
     clean_output_directories()
 
-    # Create output directory for daltonized images.
+    # Create output directory for daltonized and simulated images.
     if (not path.exists("daltonized")):
         os.mkdir("daltonized")
+    if (not path.exists("simulated")):
+        os.mkdir("simulated")
 
     try:
         # Loop through all unread messages in inbox.
@@ -57,6 +65,12 @@ def process_pms(red):
             usernameMention = msg.subject == 'username mention'
             usernameInBody = msg.subject == 'comment reply' and botname in msg.body.lower()
             isCommentReply = msg.was_comment
+
+            daltonize_flag = True if '--d' in msg.body.lower() or 'dick' in msg.body.lower() else False
+            simulate_flag = True if '--s' in msg.body.lower() or 'simulate' in msg.body.lower() else False
+
+            daltonize_error = False
+            simulate_error = False
 
             # This PM doesn't meet the response criteria. Mark it as 'read' and skip it.
             if not (usernameMention or usernameInBody or not isCommentReply):
@@ -84,9 +98,12 @@ def process_pms(red):
             commentPost = mentionedComment.submission
             imageUrl = None
             commentReply = None
-            uploaded_image_d = None
-            uploaded_image_p = None
-            uploaded_image_t = None
+            d_uploaded_image_d = None
+            d_uploaded_image_p = None
+            d_uploaded_image_t = None
+            s_uploaded_image_d = None
+            s_uploaded_image_p = None
+            s_uploaded_image_t = None
 
             # If submission is a link post.
             if (not commentPost.is_self):
@@ -107,32 +124,64 @@ def process_pms(red):
                 meta = site.info()
                 if (meta["content-type"] in image_formats):
                     # Download the image and verify it exists locally.
-                    urllib.request.urlretrieve(imageUrl, "daltonize-this.jpg")
-                    if (os.path.isfile("daltonize-this.jpg")):
+                    urllib.request.urlretrieve(imageUrl, "downloaded-image.jpg")
+                    if (os.path.isfile("downloaded-image.jpg")):
                         print_d("Successfully downloaded image")
-                        print_d("Daltonizing...")
+                        # If daltonizing.
+                        if (daltonize_flag is False and simulate_flag is False or daltonize_flag is True and simulate_flag is False):
+                            daltonize_flag = True
+                            print_d("Daltonizing...")
+                            # Runs the daltonization operation for deuteranopia, protanopia, and tritanopia colourblindness.
+                            d_run("downloaded-image.jpg", config.d_output_dir_deuteranopia, "d")
+                            d_run("downloaded-image.jpg", config.d_output_dir_protanopia, "p")
+                            d_run("downloaded-image.jpg", config.d_output_dir_tritanopia, "t")
 
-                        # Runs the daltonization operation for both deuteranopia and protanopia colourblindness.
-                        d_run("daltonize-this.jpg", config.output_dir_deuteranopia, "d");
-                        d_run("daltonize-this.jpg", config.output_dir_protanopia, "p");
-                        d_run("daltonize-this.jpg", config.output_dir_tritanopia, "t");
+                        # If daltonizing and simulating.
+                        elif (daltonize_flag is True and simulate_flag is True):
+                            print_d("Daltonizing and simulating...")
+                            # Runs the daltonization and simulation operation for deuteranopia, protanopia, and tritanopia colourblindness.
+                            d_run("downloaded-image.jpg", config.d_output_dir_deuteranopia, "d")
+                            d_run("downloaded-image.jpg", config.d_output_dir_protanopia, "p")
+                            d_run("downloaded-image.jpg", config.d_output_dir_tritanopia, "t")
+                            s_run("downloaded-image.jpg", config.s_output_dir_deuteranopia, "d")
+                            s_run("downloaded-image.jpg", config.s_output_dir_protanopia, "p")
+                            s_run("downloaded-image.jpg", config.s_output_dir_tritanopia, "t")
 
-                        # Verify daltonized output files exist.
-                        if (os.path.isfile(config.output_dir_deuteranopia) and os.path.isfile(config.output_dir_protanopia) and os.path.isfile(config.output_dir_tritanopia)):
-                            print_d("Successfully daltonized images")
-                            print_d("Uploading to Imgur...")
+                        # If simulating.
+                        elif (daltonize_flag is False and simulate_flag is True):
+                            print_d("Simulating...")
+                            # Runs the simulation operation for deuteranopia, protanopia, and tritanopia colourblindness.
+                            s_run("downloaded-image.jpg", config.s_output_dir_deuteranopia, "d")
+                            s_run("downloaded-image.jpg", config.s_output_dir_protanopia, "p")
+                            s_run("downloaded-image.jpg", config.s_output_dir_tritanopia, "t")
 
-                            # Upload daltonized images to Imgur.
-                            im = pyimgur.Imgur(config.imgur_client_id)
-                            uploaded_image_d = im.upload_image(config.output_dir_deuteranopia, title="Uploaded by /u/Dalton-Bot")
-                            uploaded_image_p = im.upload_image(config.output_dir_protanopia, title="Uploaded by /u/Dalton-Bot")
-                            uploaded_image_t = im.upload_image(config.output_dir_tritanopia, title="Uploaded by /u/Dalton-Bot")
-                        else:
-                            # The daltonized images were not found, so must have failed during daltonization.
-                            print_d("Failed to daltonize. Daltonized images were not found.")
-                            commentReply = "I'm sorry, but I was unable to daltonize the image." + config.footer_text
-                            make_comment(msg, mentionedComment, commentReply)
-                            continue
+                        im = pyimgur.Imgur(config.imgur_client_id)
+                        if (daltonize_flag is True):
+                            if (os.path.isfile(config.d_output_dir_deuteranopia) and os.path.isfile(config.d_output_dir_protanopia) and os.path.isfile(config.d_output_dir_tritanopia)):
+                                print_d("Successfully daltonized images")
+                                print_d("Uploading daltonized images to Imgur...")
+                                d_uploaded_image_d = im.upload_image(config.d_output_dir_deuteranopia, title="Uploaded by /u/Dalton-Bot")
+                                d_uploaded_image_p = im.upload_image(config.d_output_dir_protanopia, title="Uploaded by /u/Dalton-Bot")
+                                d_uploaded_image_t = im.upload_image(config.d_output_dir_tritanopia, title="Uploaded by /u/Dalton-Bot")
+                            else:
+                                # The daltonized images were not found, so must have failed during daltonization.
+                                print_d("Failed to daltonize. Daltonized images were not found.")
+                                commentReply = "I'm sorry, but I was unable to daltonize the image." + config.footer_text
+                                daltonize_error = True
+
+                        if (simulate_flag is True):
+                            if (os.path.isfile(config.s_output_dir_deuteranopia) and os.path.isfile(config.s_output_dir_protanopia) and os.path.isfile(config.s_output_dir_tritanopia)):
+                                print_d("Successfully simulated images")
+                                print_d("Uploading simulated images to Imgur...")
+                                s_uploaded_image_d = im.upload_image(config.s_output_dir_deuteranopia, title="Uploaded by /u/Dalton-Bot")
+                                s_uploaded_image_p = im.upload_image(config.s_output_dir_protanopia, title="Uploaded by /u/Dalton-Bot")
+                                s_uploaded_image_t = im.upload_image(config.s_output_dir_tritanopia, title="Uploaded by /u/Dalton-Bot")
+                            else:
+                                # The simulated images were not found, so must have failed during simulation.
+                                print_d("Failed to simulate. Simulated images were not found.")
+                                commentReply = "I'm sorry, but I was unable to daltonize the image." + config.footer_text
+                                simulate_error = True
+
                     else:
                         # The bot failed to download the image in the post.
                         print_d("Failed to download image. Image file was not found.")
@@ -147,20 +196,45 @@ def process_pms(red):
                     continue
 
                 # If images are uploaded.
-                if (uploaded_image_d is not None and uploaded_image_p is not None and uploaded_image_t is not None):
-                    print_d("This is the uploaded D-Image: " + uploaded_image_d.link + ", P-Image: " + uploaded_image_p.link + ", T-Image: " + uploaded_image_t.link)
-                    commentReply = "Here you go:\n\nDeutan: " + uploaded_image_d.link + "\n\nProtan: " + uploaded_image_p.link + "\n\nTritan: " + uploaded_image_t.link + config.footer_text
-                    make_comment(msg, mentionedComment, commentReply)
-                    continue
-                else:
-                    # The bot failed to upload the images to Imgur.
-                    print_d("The Imgur links don't exist")
-                    commentReply = "I'm sorry, but I was unable to upload the daltonized images to Imgur." + config.footer_text
-                    make_comment(msg, mentionedComment, commentReply)
-                    continue
+                if (daltonize_flag is True and simulate_flag is True):
+                    if (d_uploaded_image_d is not None and d_uploaded_image_p is not None and d_uploaded_image_t is not None and s_uploaded_image_d is not None and s_uploaded_image_p is not None and s_uploaded_image_t is not None):
+                        print_d("This is the uploaded daltonized D-Image: " + d_uploaded_image_d.link + ", P-Image: " + d_uploaded_image_p.link + ", T-Image: " + d_uploaded_image_t.link)
+                        print_d("This is the uploaded simulated D-Image: " + s_uploaded_image_d.link + ", P-Image: " + s_uploaded_image_p.link + ", T-Image: " + s_uploaded_image_t.link)
+                        commentReply = "Here are your daltonized images:\n\nDeutan: " + d_uploaded_image_d.link + "\n\nProtan: " + d_uploaded_image_p.link + "\n\nTritan: " + d_uploaded_image_t.link + "\n\n&nbsp;\n\nHere are your simulated images:\n\nDeutan: " + s_uploaded_image_d.link + "\n\nProtan: " + s_uploaded_image_p.link + "\n\nTritan: " + s_uploaded_image_t.link + config.footer_text
+                        make_comment(msg, mentionedComment, commentReply)
+                        continue
+                    else:
+                        # The bot failed to upload the images to Imgur.
+                        print_d("The Imgur links don't exist")
+                        commentReply = "I'm sorry, but I was unable to upload the daltonized/simulated images to Imgur." + config.footer_text
+                        make_comment(msg, mentionedComment, commentReply)
+                        continue
 
-            # Make the comment with the imgur links containing the daltonized images.
-            make_comment(msg, mentionedComment, commentReply)
+                elif (daltonize_flag is True and simulate_flag is False):
+                    if (d_uploaded_image_d is not None and d_uploaded_image_p is not None and d_uploaded_image_t is not None):
+                        print_d("This is the uploaded daltonized D-Image: " + d_uploaded_image_d.link + ", P-Image: " + d_uploaded_image_p.link + ", T-Image: " + d_uploaded_image_t.link)
+                        commentReply = "Here are your daltonized images:\n\nDeutan: " + d_uploaded_image_d.link + "\n\nProtan: " + d_uploaded_image_p.link + "\n\nTritan: " + d_uploaded_image_t.link + config.footer_text
+                        make_comment(msg, mentionedComment, commentReply)
+                        continue
+                    else:
+                        # The bot failed to upload the images to Imgur.
+                        print_d("The Imgur links don't exist")
+                        commentReply = "I'm sorry, but I was unable to upload the daltonized images to Imgur." + config.footer_text
+                        make_comment(msg, mentionedComment, commentReply)
+                        continue
+                    
+                elif (daltonize_flag is False and simulate_flag is True):
+                    if (s_uploaded_image_d is not None and s_uploaded_image_p is not None and s_uploaded_image_t is not None):
+                        print_d("This is the uploaded simulated D-Image: " + s_uploaded_image_d.link + ", P-Image: " + s_uploaded_image_p.link + ", T-Image: " + s_uploaded_image_t.link)
+                        commentReply = "Here your simulated images:\n\nDeutan: " + s_uploaded_image_d.link + "\n\nProtan: " + s_uploaded_image_p.link + "\n\nTritan: " + s_uploaded_image_t.link + config.footer_text
+                        make_comment(msg, mentionedComment, commentReply)
+                        continue
+                    else:
+                        # The bot failed to upload the images to Imgur.
+                        print_d("The Imgur links don't exist")
+                        commentReply = "I'm sorry, but I was unable to upload the simulated images to Imgur." + config.footer_text
+                        make_comment(msg, mentionedComment, commentReply)
+                        continue
 
     except Exception as e:
         # An error has occured, log the message and retry.
