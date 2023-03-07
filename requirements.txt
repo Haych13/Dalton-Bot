@@ -1,0 +1,5 @@
+pip
+pyimgur
+praw
+pillow
+numpy

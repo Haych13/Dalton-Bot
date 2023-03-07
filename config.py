@@ -14,3 +14,4 @@ d_output_dir_tritanopia = "daltonized/tritanopia.jpg"
 s_output_dir_deuteranopia  = "simulated/deuteranopia.jpg"
 s_output_dir_protanopia = "simulated/protanopia.jpg"
 s_output_dir_tritanopia = "simulated/tritanopia.jpg"
+
