@@ -1,9 +1,10 @@
-# r-Colorblind bot
+# dalton-bot
 
-This repo is to create a bot for /r/colorblind, so the user's can request the bot to daltonize an image so it's viewable to those who have CVD
+This repo is to create a bot for /r/colorblind, so the user's can request the bot to daltonize an image so it's viewable to those who have CVD, or to simulate what an image looks like for people with CVD
 
 # Requirements
 Docker
+
 Docker Compose
   
 # Installation
