@@ -12,7 +12,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the rest of the application code and directories into the container
 COPY main.py .
-COPY config.py .
+COPY .env .
 COPY daltonize.py .
 COPY daltonized/ .
 COPY simulated/ .
