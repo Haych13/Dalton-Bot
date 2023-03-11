@@ -3,3 +3,4 @@ pyimgur
 praw
 pillow
 numpy
+python-dotenv
