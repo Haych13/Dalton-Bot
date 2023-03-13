@@ -26,6 +26,20 @@ s_output_dir_deuteranopia  = os.getenv('S_OUTPUT_DIR_DEUTERANOPIA')
 s_output_dir_protanopia = os.getenv('S_OUTPUT_DIR_PROTANOPIA')
 s_output_dir_tritanopia = os.getenv('S_OUTPUT_DIR_TRITANOPIA')
 
+# Print the environment variables for testing
+print(os.getenv("USERNAME"))
+print(os.getenv("PASSWORD"))
+print(os.getenv("CLIENT_ID"))
+print(os.getenv("CLIENT_SECRET"))
+print(os.getenv("IMGUR_CLIENT_ID"))
+print(os.getenv("FOOTER_TEXT"))
+print(os.getenv("D_OUTPUT_DIR_DEUTERANOPIA"))
+print(os.getenv("D_OUTPUT_DIR_PROTANOPIA"))
+print(os.getenv("D_OUTPUT_DIR_TRITANOPIA"))
+print(os.getenv("S_OUTPUT_DIR_DEUTERANOPIA"))
+print(os.getenv("S_OUTPUT_DIR_PROTANOPIA"))
+print(os.getenv("S_OUTPUT_DIR_TRITANOPIA"))
+
 #Create botname
 botname = 'u/' + username.lower()
 
@@ -43,7 +57,7 @@ def bot_login():
                 client_secret = client_secret,
                 user_agent = "Dalton_Bot")
     print_d("Logged in!")
-    
+
     return r
 
 def clean_output_directories():
@@ -237,7 +251,7 @@ def process_pms(red):
                         # The bot failed to upload the images to Imgur.
                         print_d("The Imgur links don't exist")
                         commentReply = "I'm sorry, but I was unable to upload the daltonized images to Imgur." + footer_text
-                    
+
                 elif (daltonize_flag is False and simulate_flag is True):
                     if (s_uploaded_image_d is not None and s_uploaded_image_p is not None and s_uploaded_image_t is not None):
                         print_d("This is the uploaded simulated D-Image: " + s_uploaded_image_d.link + ", P-Image: " + s_uploaded_image_p.link + ", T-Image: " + s_uploaded_image_t.link)
@@ -273,9 +287,9 @@ def make_comment(msg, mentionedComment, commentReply):
 
 r = bot_login()
 
-while True: 
+while True:
     process_pms(r)
     time.sleep(10)
-    
+
 sys.stdout = open("/dev/stdout", "w")
 sys.stderr = open("/dev/stderr", "w")
