@@ -40,7 +40,7 @@ docker run \
 -e S_OUTPUT_DIR_DEUTERANOPIA=simulated/deuteranopia.jpg \
 -e S_OUTPUT_DIR_PROTANOPIA=simulated/protanopia.jpg \
 -e S_OUTPUT_DIR_TRITANOPIA=simulated/tritanopia.jpg \
-dalton-bot:latest
+haych13/dalton-bot:latest
 ```
 # Docker-compose
 ```
